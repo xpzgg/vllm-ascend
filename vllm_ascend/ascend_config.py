@@ -1233,8 +1233,17 @@ class XliteGraphConfig:
 
     enabled: bool = False
     full_mode: bool = False
+    # DSACP distributes DSA indexer queries across the existing TP group.
+    enable_dsacp: bool = False
+    dsacp_min_seq_len: int = 8192
 
     def _validate_preconditions(self, vllm_config: VllmConfig):
+        if self.dsacp_min_seq_len < 1:
+            raise ValueError("xlite_graph_config.dsacp_min_seq_len must be positive.")
+        if self.enable_dsacp and not (self.enabled and self.full_mode):
+            raise ValueError(
+                "DSACP requires xlite_graph_config.enabled=true and full_mode=true."
+            )
         if not self.enabled:
             return
 
